@@ -53,6 +53,8 @@ DROP INDEX IF EXISTS IDX_consorcio_idprovincia_idlocalidad_idconsorcio ON consor
 DROP INDEX IF EXISTS IDX_gasto_idprovincia_idlocalidad_idconsorcio_periodo ON gasto;
 
 
+
+create t
 --consulta para comprobar la inteligencia de sql al verificar que necesita indices 
 use consorcio
 
@@ -70,4 +72,32 @@ use consorcio
 														   co.idprovincia = gasto.idprovincia 
 
 								where idtipogasto = 3 and datepart (yy,fechapago) = 2015						
+	)	
+
+
+
+	create table ejemplo (
+	
+		valor1 varchar(20) not null ,
+		valor2 varchar (20)not null ,
+		valor3 varchar(20) not null 
+	
 	)
+
+
+
+	insert into ejemplo (valor1,valor2,valor3)values('ejemplo5','ejempl1','ejem1')
+	insert into ejemplo (valor1,valor2,valor3)values('ejemplo1234','ejempl1','ejem1')
+	insert into ejemplo (valor1,valor2,valor3)values('ejemplo122','ejempl1','ejem1')
+	insert into ejemplo (valor1,valor2,valor3)values('ejemplo13123','ejempl1','ejem1')
+
+	alter table ejemplo add constraint pk_ejemplo primary key (valor1)
+
+
+	drop table ejemplo
+	
+	execute sp_helpindex 'gasto'	execute sp_helpindex 'consorcio'
+
+
+DROP INDEX indx_demostracion ON gasto;
+DROP INDEX gasto.indx_demostracion;
