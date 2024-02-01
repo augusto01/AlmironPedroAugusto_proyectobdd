@@ -9683,13 +9683,3 @@ SELECT count(*) FROM [dbo].[gasto];
 select count (*) from consorcio 
 
 
---VERIFICAMOS QUE NO EXISTE NINGUN INDEX EN LA TABLA CONSORCIO MAS QUE LA PK QUE SE GENERA POR DEFECTO
-execute sp_helpindex 'consorcio'
-
-select * from administrador
-select idadmin from administrador 
-select apeynom from administrador
-
-
---creamos un index no clustered para que ordene los registros por apeynom
-create nonclustered index IDX_APEYNOM ON administrador (apeynom)

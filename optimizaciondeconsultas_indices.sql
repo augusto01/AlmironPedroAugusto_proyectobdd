@@ -53,4 +53,21 @@ DROP INDEX IF EXISTS IDX_consorcio_idprovincia_idlocalidad_idconsorcio ON consor
 DROP INDEX IF EXISTS IDX_gasto_idprovincia_idlocalidad_idconsorcio_periodo ON gasto;
 
 
+--consulta para comprobar la inteligencia de sql al verificar que necesita indices 
+use consorcio
 
+	
+	select consorcio.nombre as 'Consorcio', sum (importe) as 'Importe total' from consorcio
+	inner join gasto on gasto.idconsorcio = consorcio.idconsorcio and
+						gasto.idprovincia = consorcio.idprovincia and
+						gasto.idlocalidad = consorcio.idlocalidad
+	where idtipogasto = 3 and datepart (yy,fechapago)=2015	
+	group by consorcio.nombre
+	having sum (gasto.importe)>(
+								select avg(importe) from gasto
+								inner join consorcio co on co.idconsorcio = gasto.idconsorcio and
+													       co.idlocalidad = gasto.idlocalidad and
+														   co.idprovincia = gasto.idprovincia 
+
+								where idtipogasto = 3 and datepart (yy,fechapago) = 2015						
+	)
