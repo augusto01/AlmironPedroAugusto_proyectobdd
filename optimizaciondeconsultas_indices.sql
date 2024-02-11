@@ -37,9 +37,6 @@ FROM localidad WITH (INDEX (IDX_localidad_idprovincia_idlocalidad))
 SET STATISTICS TIME OFF;
 SET STATISTICS IO OFF;
 
-
-
-
 -- Borrar índices en la tabla 'provincia'
 DROP INDEX IF EXISTS IDX_provincia_descripcion ON provincia;
 
@@ -54,7 +51,7 @@ DROP INDEX IF EXISTS IDX_gasto_idprovincia_idlocalidad_idconsorcio_periodo ON ga
 
 
 
-create t
+
 --consulta para comprobar la inteligencia de sql al verificar que necesita indices 
 use consorcio
 
