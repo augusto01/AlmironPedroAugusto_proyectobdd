@@ -17,7 +17,7 @@ SELECT * FROM localidad
 SELECT * FROM consorcio
 SELECT * FROM gasto
 
-
+--prueba repositorio
 --creamos algunos index no clustered 
 CREATE NONCLUSTERED INDEX IDX_provincia_descripcion ON provincia(descripcion);
 CREATE NONCLUSTERED INDEX IDX_localidad_idprovincia_idlocalidad ON localidad(idprovincia, idlocalidad);
