@@ -1,100 +1,81 @@
 --proyecto bases de datos 1 2024 - ALMIRON PEDRO AUGUSTO, OPTIMIZACION DE BUSQUEDA MEDIANTE INDICES 
-use consorcio
+--use consorcio
 --VERIFICAMOS QUE NO EXISTE NINGUN INDEX EN LA TABLA CONSORCIO MAS QUE LA PK QUE SE GENERA POR DEFECTO
-execute sp_helpindex 'consorcio'
+execute sp_helpindex 'gasto'
 
 
 --activamos estadisticas de tiempo y de lectura 
 SET STATISTICS TIME ON;
 SET STATISTICS IO ON;
 
+SET NOCOUNT ON; -- Para mejorar el rendimiento al insertar una gran cantidad de registros
+
+--definimos el script que permitira insertar 1 millon de registros en la tabla gasto 
 
 
 
---CONSULTAMOS 
-SELECT * FROM provincia
-SELECT * FROM localidad
-SELECT * FROM consorcio
-SELECT * FROM gasto
+SET NOCOUNT ON; -- Para mejorar el rendimiento al insertar una gran cantidad de registros
 
---prueba repositorio
---creamos algunos index no clustered 
-CREATE NONCLUSTERED INDEX IDX_provincia_descripcion ON provincia(descripcion);
-CREATE NONCLUSTERED INDEX IDX_localidad_idprovincia_idlocalidad ON localidad(idprovincia, idlocalidad);
-CREATE NONCLUSTERED INDEX IDX_consorcio_idprovincia_idlocalidad_idconsorcio ON consorcio(idprovincia, idlocalidad, idconsorcio);
-CREATE NONCLUSTERED INDEX IDX_gasto_idprovincia_idlocalidad_idconsorcio_periodo ON gasto(idprovincia, idlocalidad, idconsorcio, periodo);
+DECLARE @TotalRows INT = 1000000; -- Total de registros a insertar
+DECLARE @Counter INT = 1;
+DECLARE @FechaPago datetime = GETDATE(); -- Fecha de pago constante, se toma la fecha actual
+DECLARE @Periodo INT = 1; -- Periodo fijo para todos los registros
+
+WHILE @Counter <= @TotalRows
+BEGIN
+    INSERT INTO gasto (idprovincia, idlocalidad, idconsorcio, periodo, fechapago, idtipogasto, importe)
+    VALUES (1,
+            1,
+            1,
+            2,
+            getdate(),
+            1,
+            1000); -- Mismo valor para el importe en cada registro
+    
+    SET @Counter = @Counter + 1;
+END;
+
+
+
+/*SE INSERTO 1.000.000 DE REGISTROS EN LA TABLA GASTOS, LA CONSULTA TUVO UN COSTE EN TERMINOS DE TIEMPO DE 1 MINUTO 51 SEGUNDOS CON EL SCRIPT ANTERIOR */
+
+--realizamos la busqueda por periodo seleccionando fechade pago y tipo de gasto 
+SELECT fechapago, tg.descripcion 
+FROM gasto
+INNER JOIN tipogasto tg ON gasto.idtipogasto = tg.idtipogasto
+WHERE periodo = 2;
+
+
+--creamos algunos index no clustered en la tabla gasto, para el campo periodo
+CREATE NONCLUSTERED INDEX IDX_GASTO_TIPOGASTO ON gasto(periodo);
+
 
 --ejecutamos los select con los indices no clustered
+SELECT fechapago, tg.descripcion 
+FROM gasto with(INDEX(IDX_fechapago_idtipogasto))
+INNER JOIN tipogasto tg ON gasto.idtipogasto = tg.idtipogasto
+WHERE periodo = 2;
 
-SELECT descripcion
-FROM provincia WITH (INDEX (IDX_provincia_descripcion)) 
+--borramos el indice creado anteriormente 
+DROP INDEX IF EXISTS "IDX_fechapago_idtipogasto_i" ON gasto;
 
+--ahora creamos un indice compuesto 
+CREATE NONCLUSTERED INDEX [IDX_fechapago_idtipogasto] ON [dbo].[gasto] ([fechapago], [idtipogasto]);
 
-SELECT descripcion
-FROM localidad WITH (INDEX (IDX_localidad_idprovincia_idlocalidad)) 
+SELECT g.fechapago, tg.descripcion 
+FROM gasto g WITH(INDEX("IDX_fechapago_idtipogasto"))
+INNER JOIN tipogasto tg ON g.idtipogasto = tg.idtipogasto
+WHERE g.periodo = 2;
+
 
 --apagar estadisticas
 SET STATISTICS TIME OFF;
 SET STATISTICS IO OFF;
 
--- Borrar índices en la tabla 'provincia'
-DROP INDEX IF EXISTS IDX_provincia_descripcion ON provincia;
 
--- Borrar índices en la tabla 'localidad'
-DROP INDEX IF EXISTS IDX_localidad_idprovincia_idlocalidad ON localidad;
+--comando para verificar los indices existentes en la tabla 'gasto'	
 
--- Borrar índices en la tabla 'consorcio'
-DROP INDEX IF EXISTS IDX_consorcio_idprovincia_idlocalidad_idconsorcio ON consorcio;
+execute sp_helpindex 'gasto'	
 
--- Borrar índices en la tabla 'gasto'
-DROP INDEX IF EXISTS IDX_gasto_idprovincia_idlocalidad_idconsorcio_periodo ON gasto;
-
-
-
-
---consulta para comprobar la inteligencia de sql al verificar que necesita indices 
-use consorcio
-
-	
-	select consorcio.nombre as 'Consorcio', sum (importe) as 'Importe total' from consorcio
-	inner join gasto on gasto.idconsorcio = consorcio.idconsorcio and
-						gasto.idprovincia = consorcio.idprovincia and
-						gasto.idlocalidad = consorcio.idlocalidad
-	where idtipogasto = 3 and datepart (yy,fechapago)=2015	
-	group by consorcio.nombre
-	having sum (gasto.importe)>(
-								select avg(importe) from gasto
-								inner join consorcio co on co.idconsorcio = gasto.idconsorcio and
-													       co.idlocalidad = gasto.idlocalidad and
-														   co.idprovincia = gasto.idprovincia 
-
-								where idtipogasto = 3 and datepart (yy,fechapago) = 2015						
-	)	
-
-
-
-	create table ejemplo (
-	
-		valor1 varchar(20) not null ,
-		valor2 varchar (20)not null ,
-		valor3 varchar(20) not null 
-	
-	)
-
-
-
-	insert into ejemplo (valor1,valor2,valor3)values('ejemplo5','ejempl1','ejem1')
-	insert into ejemplo (valor1,valor2,valor3)values('ejemplo1234','ejempl1','ejem1')
-	insert into ejemplo (valor1,valor2,valor3)values('ejemplo122','ejempl1','ejem1')
-	insert into ejemplo (valor1,valor2,valor3)values('ejemplo13123','ejempl1','ejem1')
-
-	alter table ejemplo add constraint pk_ejemplo primary key (valor1)
-
-
-	drop table ejemplo
-	
-	execute sp_helpindex 'gasto'	execute sp_helpindex 'consorcio'
-
-
-DROP INDEX indx_demostracion ON gasto;
+DROP INDEX "<IDX_fechapago_idtipogasto>" ON gasto;
 DROP INDEX gasto.indx_demostracion;
