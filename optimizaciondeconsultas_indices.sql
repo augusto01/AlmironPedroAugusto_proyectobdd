@@ -67,7 +67,7 @@ FROM gasto g WITH(INDEX("IDX_fechapago_idtipogasto"))
 INNER JOIN tipogasto tg ON g.idtipogasto = tg.idtipogasto
 WHERE g.periodo = 2;
 
-
+select * from consorcio
 --apagar estadisticas
 SET STATISTICS TIME OFF;
 SET STATISTICS IO OFF;
@@ -79,3 +79,81 @@ execute sp_helpindex 'gasto'
 
 DROP INDEX "<IDX_fechapago_idtipogasto>" ON gasto;
 DROP INDEX gasto.indx_demostracion;
+
+ /*==================================== V2 4-03-24 ==============================*/
+ --1 ) crearemos 3 bases de datos distintas con distintos indices 
+ --2 ) procederemos a documentar el rendimiento y la eficiencia con los indices creados anteriormente
+
+
+ create database prueba1
+ use prueba1
+ --cargamos el modelo de datos consorcio e insertamos el lote de datos correspondiente 
+ 
+ --insertamos 1.000.000 de registros en la tabla gastos para que tenga sentido los indices 
+DECLARE @TotalRows INT = 1000000; -- Total de registros a insertar
+DECLARE @Counter INT = 1;
+DECLARE @FechaPago datetime = GETDATE(); -- Fecha de pago constante, se toma la fecha actual
+DECLARE @Periodo INT = 1; -- Periodo fijo para todos los registros
+
+WHILE @Counter <= @TotalRows
+BEGIN
+    INSERT INTO gasto (idprovincia, idlocalidad, idconsorcio, periodo, fechapago, idtipogasto, importe)
+    VALUES (1,
+            1,
+            1,
+            2,
+            getdate(),
+            1,
+            1000); -- Mismo valor para el importe en cada registro
+    
+    SET @Counter = @Counter + 1;
+END;
+
+--la consulta se ejecuto correctamente en un tiempo de 1 minuto 56segs
+
+
+
+/*Ahora creamos un indice no cluster para verificar la diferencia de eficiencia con prueba 1*/
+
+USE [prueba2]
+GO
+CREATE NONCLUSTERED INDEX [IDX_NOCLUSTER_PRUEBA1]
+ON [dbo].[gasto] ([periodo])
+INCLUDE ([fechapago],[idtipogasto])
+
+sp_helpindex 'gasto' --verificamos que el indice se creo correctamente
+
+/*Realizar una búsqueda por periodo, 
+seleccionando los campos: fecha de pago y tipo de gasto (con la descripción correspondiente)*/
+
+SELECT g.fechapago, tg.descripcion FROM gasto g 
+inner join tipogasto tg on tg.idtipogasto = g.idtipogasto
+where g.periodo = 2
+
+
+
+
+
+/*======== PRUEBA 2 ===========*/
+CREATE DATABASE prueba2
+use prueba2 
+
+ --insertamos 1.000.000 de registros en la tabla gastos para que tenga sentido los indices para la prueba 2 
+DECLARE @TotalRows INT = 1000000; -- Total de registros a insertar
+DECLARE @Counter INT = 1;
+DECLARE @FechaPago datetime = GETDATE(); -- Fecha de pago constante, se toma la fecha actual
+DECLARE @Periodo INT = 1; -- Periodo fijo para todos los registros
+
+WHILE @Counter <= @TotalRows
+BEGIN
+    INSERT INTO gasto (idprovincia, idlocalidad, idconsorcio, periodo, fechapago, idtipogasto, importe)
+    VALUES (1,
+            1,
+            1,
+            2,
+            getdate(),
+            1,
+            1000); -- Mismo valor para el importe en cada registro
+    
+    SET @Counter = @Counter + 1;
+END;
