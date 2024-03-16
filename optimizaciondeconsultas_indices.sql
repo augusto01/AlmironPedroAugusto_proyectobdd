@@ -16,24 +16,23 @@ SET NOCOUNT ON; -- Para mejorar el rendimiento al insertar una gran cantidad de 
 
 SET NOCOUNT ON; -- Para mejorar el rendimiento al insertar una gran cantidad de registros
 
-DECLARE @TotalRows INT = 1000000; -- Total de registros a insertar
-DECLARE @Counter INT = 1;
-DECLARE @FechaPago datetime = GETDATE(); -- Fecha de pago constante, se toma la fecha actual
-DECLARE @Periodo INT = 1; -- Periodo fijo para todos los registros
+	DECLARE @TotalRows INT = 1000000; -- Total de registros a insertar
+	DECLARE @Counter INT = 1;
+	DECLARE @FechaPago datetime = GETDATE(); -- Fecha de pago constante, se toma la fecha actual
+	DECLARE @Periodo INT = 1; -- Periodo fijo para todos los registros
 
-WHILE @Counter <= @TotalRows
-BEGIN
-    INSERT INTO gasto (idprovincia, idlocalidad, idconsorcio, periodo, fechapago, idtipogasto, importe)
-    VALUES (1,
-            1,
-            1,
-            2,
-            getdate(),
-            1,
-            1000); -- Mismo valor para el importe en cada registro
-    
-    SET @Counter = @Counter + 1;
-END;
+	WHILE @Counter <= @TotalRows
+	BEGIN
+		INSERT INTO gasto (idprovincia, idlocalidad, idconsorcio, periodo, fechapago, idtipogasto, importe)
+		VALUES (1,
+				1,
+				1,
+				CAST(RAND() * 6 AS INT) + 1, -- CORRECCION PROFE CUZZIOL, GENERARA UN NUMERO ALEATORIO ENTERO ENTRE 1 Y 6 
+				GETDATE(),
+				1,
+				1000) -- Mismo valor para el importe en cada registro
+		SET @Counter = @Counter + 1;
+	END;
 
 
 
@@ -141,21 +140,20 @@ CREATE DATABASE prueba2
 use prueba2 
 
  --insertamos 1.000.000 de registros en la tabla gastos para que tenga sentido los indices para la prueba 2 
-DECLARE @TotalRows INT = 1000000; -- Total de registros a insertar
-DECLARE @Counter INT = 1;
-DECLARE @FechaPago datetime = GETDATE(); -- Fecha de pago constante, se toma la fecha actual
-DECLARE @Periodo INT = 1; -- Periodo fijo para todos los registros
+	DECLARE @TotalRows INT = 1000000; -- Total de registros a insertar
+	DECLARE @Counter INT = 1;
+	DECLARE @FechaPago datetime = GETDATE(); -- Fecha de pago constante, se toma la fecha actual
+	DECLARE @Periodo INT = 1; -- Periodo fijo para todos los registros
 
-WHILE @Counter <= @TotalRows
-BEGIN
-    INSERT INTO gasto (idprovincia, idlocalidad, idconsorcio, periodo, fechapago, idtipogasto, importe)
-    VALUES (1,
-            1,
-            1,
-            2,
-            getdate(),
-            1,
-            1000); -- Mismo valor para el importe en cada registro
-    
-    SET @Counter = @Counter + 1;
-END;
+	WHILE @Counter <= @TotalRows
+	BEGIN
+		INSERT INTO gasto (idprovincia, idlocalidad, idconsorcio, periodo, fechapago, idtipogasto, importe)
+		VALUES (1,
+				1,
+				1,
+				CAST(RAND() * 6 AS INT) + 1, -- CORRECCION PROFE CUZZIOL, GENERARA UN NUMERO ALEATORIO ENTERO ENTRE 1 Y 6 
+				GETDATE(),
+				1,
+				1000) -- Mismo valor para el importe en cada registro
+		SET @Counter = @Counter + 1;
+	END;
