@@ -90,24 +90,26 @@ DROP INDEX gasto.indx_demostracion;
  --cargamos el modelo de datos consorcio e insertamos el lote de datos correspondiente 
  
  --insertamos 1.000.000 de registros en la tabla gastos para que tenga sentido los indices 
-DECLARE @TotalRows INT = 1000000; -- Total de registros a insertar
-DECLARE @Counter INT = 1;
-DECLARE @FechaPago datetime = GETDATE(); -- Fecha de pago constante, se toma la fecha actual
-DECLARE @Periodo INT = 1; -- Periodo fijo para todos los registros
+	DECLARE @TotalRows INT = 1000000; -- Total de registros a insertar
+	DECLARE @Counter INT = 1;
+	DECLARE @FechaPago datetime = GETDATE(); -- Fecha de pago constante, se toma la fecha actual
+	DECLARE @Periodo INT = 1; -- Periodo fijo para todos los registros
 
-WHILE @Counter <= @TotalRows
-BEGIN
-    INSERT INTO gasto (idprovincia, idlocalidad, idconsorcio, periodo, fechapago, idtipogasto, importe)
-    VALUES (1,
-            1,
-            1,
-            2,
-            getdate(),
-            1,
-            1000); -- Mismo valor para el importe en cada registro
-    
-    SET @Counter = @Counter + 1;
-END;
+	WHILE @Counter <= @TotalRows
+	BEGIN
+		INSERT INTO gasto (idprovincia, idlocalidad, idconsorcio, periodo, fechapago, idtipogasto, importe)
+		VALUES (1,
+				1,
+				1,
+				CAST(RAND() * 6 AS INT) + 1, -- CORRECCION PROFE CUZZIOL, GENERARA UN NUMERO ALEATORIO ENTERO ENTRE 1 Y 6 
+				GETDATE(),
+				1,
+				1000) -- Mismo valor para el importe en cada registro
+		SET @Counter = @Counter + 1;
+	END;
+
+
+	
 
 --la consulta se ejecuto correctamente en un tiempo de 1 minuto 56segs
 
